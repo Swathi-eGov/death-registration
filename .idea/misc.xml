@@ -1,0 +1,17 @@
+<project version="4">
+  <component name="ExternalStorageConfigurationManager" enabled="true" />
+  <component name="MavenProjectsManager">
+    <option name="originalFiles">
+      <list>
+        <option value="$PROJECT_DIR$/pom.xml" />
+        <option value="$USER_HOME$/DIGIT-OSS/core-services/egov-idgen/pom.xml" />
+        <option value="$USER_HOME$/DIGIT-OSS/core-services/egov-mdms-service/pom.xml" />
+        <option value="$USER_HOME$/DIGIT-OSS/core-services/egov-persister/pom.xml" />
+        <option value="$USER_HOME$/DIGIT-OSS/core-services/egov-workflow-v2/pom.xml" />
+        <option value="$USER_HOME$/DIGIT-OSS/core-services/zuul/pom.xml" />
+        <option value="$USER_HOME$/DIGIT-OSS/municipal-services/pgr-services/pom.xml" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" default="true" project-jdk-name="1.8" project-jdk-type="JavaSDK" />
+</project>
