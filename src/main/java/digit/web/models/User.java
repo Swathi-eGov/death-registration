@@ -35,8 +35,8 @@ public class User {
     @JsonProperty("id")
     private Integer id = null;
 
-//    @JsonProperty("name")
-//    private String name = null;
+    @JsonProperty("name")
+    private String name = null;
 
     @JsonProperty("uuid")
     private String uuid = null;
@@ -44,8 +44,8 @@ public class User {
     @JsonProperty("userName")
     private String userName = null;
 
-    @JsonProperty("userType")
-    private String userType = null;
+    @JsonProperty("type")
+    private String type = null;
 
     @JsonProperty("gender")
     private String gender = null;

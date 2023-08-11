@@ -59,10 +59,11 @@ public class UserSearchRequest {
     @JsonProperty("sort")
     private List<String> sort = Collections.singletonList("name");
 
-    @JsonProperty("userType")
-    private String userType;
+    @JsonProperty("type")
+    private String type;
 
     @JsonProperty("roleCodes")
     private List<String> roleCodes;
+
 
 }
