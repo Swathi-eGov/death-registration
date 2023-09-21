@@ -50,7 +50,6 @@ public class MdmsUtil {
         } catch (Exception e) {
             //log.error("Exception occurred while fetching category lists from mdms: ",e);
         }
-        //log.info(ulbToCategoryListMap.toString());
         return rate;
     }
 
@@ -59,21 +58,17 @@ public class MdmsUtil {
         masterDetail.setName(masterName);
         List<MasterDetail> masterDetailList = new ArrayList<>();
         masterDetailList.add(masterDetail);
-
         ModuleDetail moduleDetail = new ModuleDetail();
         moduleDetail.setMasterDetails(masterDetailList);
         moduleDetail.setModuleName(moduleName);
         List<ModuleDetail> moduleDetailList = new ArrayList<>();
         moduleDetailList.add(moduleDetail);
-
         MdmsCriteria mdmsCriteria = new MdmsCriteria();
         mdmsCriteria.setTenantId(tenantId.split("\\.")[0]);
         mdmsCriteria.setModuleDetails(moduleDetailList);
-
         MdmsCriteriaReq mdmsCriteriaReq = new MdmsCriteriaReq();
         mdmsCriteriaReq.setMdmsCriteria(mdmsCriteria);
         mdmsCriteriaReq.setRequestInfo(requestInfo);
-
         return mdmsCriteriaReq;
     }
 }

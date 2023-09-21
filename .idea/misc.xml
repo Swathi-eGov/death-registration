@@ -10,6 +10,7 @@
         <option value="$USER_HOME$/DIGIT-OSS/core-services/egov-workflow-v2/pom.xml" />
         <option value="$USER_HOME$/DIGIT-OSS/core-services/zuul/pom.xml" />
         <option value="$USER_HOME$/DIGIT-OSS/municipal-services/pgr-services/pom.xml" />
+        <option value="$USER_HOME$/DIGIT-OSS/core-services/egov-indexer/pom.xml" />
       </list>
     </option>
   </component>

@@ -50,12 +50,10 @@ public class UserService {
         });
     }
     private User upsertUser(User user, RequestInfo requestInfo){
-
         String tenantId = user.getTenantId();
         User userServiceResponse = null;
-
         // Search on mobile number as user name
-        UserDetailResponse userDetailResponse = searchUser(userUtils.getStateLevelTenant(tenantId),null, user.getUserName(),null,user.getType());
+        UserDetailResponse userDetailResponse = searchUser(userUtils.getStateLevelTenant(tenantId),null, user.getUserName());
         if (!userDetailResponse.getUser().isEmpty()) {
             User userFromSearch = userDetailResponse.getUser().get(0);
             log.info(userFromSearch.toString());
@@ -67,9 +65,6 @@ public class UserService {
         else {
             userServiceResponse = createUser(requestInfo,tenantId,user);
         }
-
-        // Enrich the accountId
-        user.setUuid(userServiceResponse.getUuid());
         return userServiceResponse;
     }
 
@@ -87,33 +82,27 @@ public class UserService {
     }
 
     private User createUser(RequestInfo requestInfo, String tenantId, User userInfo) {
-
         userUtils.addUserDefaultFields(userInfo.getUserName(),tenantId, userInfo);
         StringBuilder uri = new StringBuilder(config.getUserHost())
                 .append(config.getUserContextPath())
                 .append(config.getUserCreateEndpoint());
-
         CreateUserRequest user = new CreateUserRequest(requestInfo, userInfo);
         log.info(user.getUser().toString());
         UserDetailResponse userDetailResponse = userUtils.userCall(user, uri);
-
         return userDetailResponse.getUser().get(0);
 
     }
 
 
-
     private void enrichUser(DeathRegistrationApplication application, RequestInfo requestInfo){
-        Integer accountIdApplicant = application.getApplicant().getId();
+        String accountIdApplicant = application.getApplicant().getUuid();
         String tenantId = application.getTenantId();
-
-        UserDetailResponse userDetailResponse = searchUser(userUtils.getStateLevelTenant(tenantId),accountIdApplicant,application.getApplicant().getUserName(),application.getApplicant().getUuid(),application.getApplicant().getType());
+        UserDetailResponse userDetailResponse = searchUser(userUtils.getStateLevelTenant(tenantId),accountIdApplicant,application.getApplicant().getUserName());
         if(userDetailResponse.getUser().isEmpty())
             throw new CustomException("INVALID_ACCOUNTID","No user exist for the given accountId");
-        else application.getApplicant().setId(userDetailResponse.getUser().get(0).getId());
+        else application.getApplicant().setUuid(userDetailResponse.getUser().get(0).getUuid());
 
     }
-
     /**
      * Creates the user from the given userInfo by calling user service
      *
@@ -122,8 +111,6 @@ public class UserService {
      * @param userInfo
      * @return
      */
-
-
     /**
      * Updates the given user by calling user service
      //     * @param requestInfo
@@ -131,39 +118,27 @@ public class UserService {
      //     * @param userFromSearch
      * @return
      */
-    public UserDetailResponse searchUser(String stateLevelTenant, Integer accountId, String userName,String uuid ,String type){
-
+    public UserDetailResponse searchUser(String stateLevelTenant, String accountId, String userName){
         UserSearchRequest userSearchRequest =new UserSearchRequest();
         userSearchRequest.setActive(true);
-        userSearchRequest.setType(type);
+        userSearchRequest.setType("CITIZEN");
         userSearchRequest.setTenantId(stateLevelTenant);
-
-        if(accountId==null && StringUtils.isEmpty(userName))
+        if(accountId==null && userName==null)
             return null;
-
-        if(!(accountId==null))
-            userSearchRequest.setUuid(Collections.singletonList(uuid));
-
-        if(!StringUtils.isEmpty(userName))
+        if(accountId!=null)
+            userSearchRequest.setUuid(Collections.singletonList(accountId));
+        if(userName!=null)
             userSearchRequest.setUserName(userName);
-
         StringBuilder uri = new StringBuilder(config.getUserHost()).append(config.getUserSearchEndpoint());
         return userUtils.userCall(userSearchRequest,uri);
-
     }
     private User updateUser(RequestInfo requestInfo,User user,User userFromSearch) {
-
         userFromSearch.setUserName(user.getUserName());
         userFromSearch.setActive(true);
-
         StringBuilder uri = new StringBuilder(config.getUserHost())
                 .append(config.getUserContextPath())
                 .append(config.getUserUpdateEndpoint());
-
-
         UserDetailResponse userDetailResponse = userUtils.userCall(new CreateUserRequest(requestInfo, userFromSearch), uri);
-
         return userDetailResponse.getUser().get(0);
-
     }
 }

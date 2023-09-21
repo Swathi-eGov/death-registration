@@ -60,6 +60,10 @@ public class DeathRegistrationApplication {
     @JsonProperty("workflow")
     private Workflow workflow = null;
 
+    @JsonProperty("applicantId")
+    private String applicantId = null;
+
+
 
 }
 

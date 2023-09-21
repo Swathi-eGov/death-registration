@@ -11,7 +11,7 @@ import java.util.List;
 @Component
 public class DeathApplicationQueryBuilder {
 
-    private static final String BASE_DTR_QUERY = " SELECT dtr.id as did, dtr.tenantid as dtenantid, dtr.applicationnumber as dapplicationnumber, dtr.deceasedfirstname as ddeceasedfirstname, dtr.deceasedlastname as ddeceasedlastname, dtr.placeofdeath as dplaceofdeath, dtr.timeofdeath as dtimeofdeath, dtr.createdby as dcreatedby, dtr.lastmodifiedby as dlastmodifiedby, dtr.createdtime as dcreatedtime, dtr.lastmodifiedtime as dlastmodifiedtime, ";
+    private static final String BASE_DTR_QUERY = " SELECT dtr.id as did, dtr.tenantid as dtenantid, dtr.applicationnumber as dapplicationnumber, dtr.deceasedfirstname as ddeceasedfirstname, dtr.deceasedlastname as ddeceasedlastname, dtr.placeofdeath as dplaceofdeath, dtr.timeofdeath as dtimeofdeath, dtr.createdby as dcreatedby, dtr.lastmodifiedby as dlastmodifiedby, dtr.createdtime as dcreatedtime, dtr.lastmodifiedtime as dlastmodifiedtime, dtr.applicantid as dapplicantid, ";
     private static final String ADDRESS_SELECT_QUERY = " add.id as aid, add.tenantid as atenantid, add.latitude as alatitude, add.longitude as alongitude, add.addressid as aaddressid, add.addressnumber as aaddressnumber, add.addressline1 as aaddressline1, add.addressline2 as aaddressline2, add.landmark as alandmark, add.city as acity, add.pincode as apincode, add.detail as adetail, add.registrationid as aregistrationid , add.createdby as acreatedby, add.lastmodifiedby as alastmodifiedby, add.createdtime as acreatedtime, add.lastmodifiedtime as alastmodifiedtime ";
     private static final String FROM_TABLES = " FROM eg_dt_registration dtr LEFT JOIN eg_dt_address add ON dtr.id = add.id ";
 
@@ -21,7 +21,6 @@ public class DeathApplicationQueryBuilder {
         StringBuilder query = new StringBuilder(BASE_DTR_QUERY);
         query.append(ADDRESS_SELECT_QUERY);
         query.append(FROM_TABLES);
-
         if (!ObjectUtils.isEmpty(criteria.getTenantId())) {
             addClauseIfRequired(query, preparedStmtList);
             query.append(" dtr.tenantid = ? ");
@@ -42,10 +41,8 @@ public class DeathApplicationQueryBuilder {
             query.append(" dtr.applicationnumber = ? ");
             preparedStmtList.add(criteria.getApplicationNumber());
         }
-
         // order death registration applications based on their createdtime in latest first manner
         query.append(ORDERBY_CREATEDTIME);
-
         return query.toString();
     }
 

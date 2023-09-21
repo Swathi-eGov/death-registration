@@ -42,7 +42,6 @@ public class WorkflowService {
     }
 
     public State callWorkFlow(ProcessInstanceRequest workflowReq) {
-
         ProcessInstanceResponse response = null;
         StringBuilder url = new StringBuilder(config.getWfHost().concat(config.getWfTransitionPath()));
         Object optional = repository.fetchResult(url, workflowReq);
@@ -52,7 +51,6 @@ public class WorkflowService {
 
     private ProcessInstance getProcessInstanceForDTR(DeathRegistrationApplication application, RequestInfo requestInfo) {
         Workflow workflow = application.getWorkflow();
-
         ProcessInstance processInstance = new ProcessInstance();
         processInstance.setBusinessId(application.getApplicationNumber());
         processInstance.setAction(workflow.getAction());
@@ -61,44 +59,33 @@ public class WorkflowService {
         processInstance.setBusinessService("DTR");
         processInstance.setDocuments(workflow.getDocuments());
         processInstance.setComment(workflow.getComments());
-
         if (!CollectionUtils.isEmpty(workflow.getAssignes())) {
             List<User> users = new ArrayList<>();
-
             workflow.getAssignes().forEach(uuid -> {
                 digit.web.models.User user = new digit.web.models.User();
                 user.setUuid(uuid);
                 users.add(user);
             });
-
             processInstance.setAssignes(users);
         }
-
         return processInstance;
 
     }
 
 
     public ProcessInstance getCurrentWorkflow(RequestInfo requestInfo, String tenantId, String applicationNumber) {
-
         RequestInfoWrapper requestInfoWrapper = RequestInfoWrapper.builder().requestInfo(requestInfo).build();
-
         StringBuilder url = getSearchURLWithParams(tenantId, applicationNumber);
-
         Object res = repository.fetchResult(url, requestInfoWrapper);
         ProcessInstanceResponse response = null;
-
         try {
             response = mapper.convertValue(res, ProcessInstanceResponse.class);
         } catch (Exception e) {
             throw new CustomException("PARSING_ERROR", "Failed to parse workflow search response");
         }
-
         if (response != null && response.getProcessInstances() != null && !CollectionUtils.isEmpty(response.getProcessInstances()) && response.getProcessInstances().get(0) != null) {
             return response.getProcessInstances().get(0);
         }
-
-
         return null;
     }
 
@@ -113,30 +100,24 @@ public class WorkflowService {
         } catch (IllegalArgumentException e) {
             throw new CustomException("PARSING ERROR", "Failed to parse response of workflow business service search");
         }
-
         if (CollectionUtils.isEmpty(response.getBusinessServices()))
             throw new CustomException("BUSINESSSERVICE_NOT_FOUND", "The businessService " + "DTR" + " is not found");
-
         return response.getBusinessServices().get(0);
     }
 
 
     private StringBuilder getSearchURLWithParams(String tenantId, String applicationNumber) {
-
         StringBuilder url = new StringBuilder(config.getWfHost());
         url.append(config.getWfProcessInstanceSearchPath());
         url.append("?tenantId=");
         url.append(tenantId);
         url.append("&businessIds=");
-
         url.append(applicationNumber);
         return url;
     }
 
     public ProcessInstanceRequest getProcessInstanceForDeathRegistrationPayment(DeathRegistrationRequest updateRequest) {
-
         DeathRegistrationApplication application = updateRequest.getDeathRegistrationApplications().get(0);
-
         ProcessInstance process = ProcessInstance.builder()
                 .businessService("DTR")
                 .businessId(application.getApplicationNumber())
@@ -145,11 +126,9 @@ public class WorkflowService {
                 .tenantId(application.getTenantId())
                 .action("PAY")
                 .build();
-
         return ProcessInstanceRequest.builder()
                 .requestInfo(updateRequest.getRequestInfo())
                 .processInstances(Arrays.asList(process))
                 .build();
-
     }
 }

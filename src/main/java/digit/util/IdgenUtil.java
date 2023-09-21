@@ -37,16 +37,12 @@ public class IdgenUtil {
         for (int i = 0; i < count; i++) {
             reqList.add(IdRequest.builder().idName(idName).format(idformat).tenantId(tenantId).build());
         }
-
         IdGenerationRequest request = IdGenerationRequest.builder().idRequests(reqList).requestInfo(requestInfo).build();
         StringBuilder uri = new StringBuilder(idGenHost).append(idGenPath);
         IdGenerationResponse response = mapper.convertValue(restRepo.fetchResult(uri, request), IdGenerationResponse.class);
-
         List<IdResponse> idResponses = response.getIdResponses();
-
         if (CollectionUtils.isEmpty(idResponses))
             throw new CustomException("IDGEN ERROR", "No ids returned from idgen Service");
-
         return idResponses.stream().map(IdResponse::getId).collect(Collectors.toList());
     }
 }

@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -31,22 +32,14 @@ public class DeathApplicationEnrichment {
             // Enrich audit details
             AuditDetails auditDetails = AuditDetails.builder().createdBy(deathRegistrationRequest.getRequestInfo().getUserInfo().getUuid()).createdTime(System.currentTimeMillis()).lastModifiedBy(deathRegistrationRequest.getRequestInfo().getUserInfo().getUuid()).lastModifiedTime(System.currentTimeMillis()).build();
             application.setAuditDetails(auditDetails);
-
             // Enrich UUID
             application.setId(UUID.randomUUID().toString());
-
-//            application.getApplicant().setId(UUID.randomUUID().toString());
-//            application.getApplicant().setUuid(UUID.randomUUID().toString());
-
             // Enrich registration Id
             application.getAddressOfDeceased().setRegistrationId(application.getId());
-
-//             Enrich address UUID
+           //  Enrich address UUID
             application.getAddressOfDeceased().setAddressId((UUID.randomUUID().toString()));
-
             //Enrich application number from IDgen
             application.setApplicationNumber(deathRegistrationIdList.get(index++));
-
         }
     }
 
@@ -56,43 +49,41 @@ public class DeathApplicationEnrichment {
         deathRegistrationRequest.getDeathRegistrationApplications().get(0).getAuditDetails().setLastModifiedBy(deathRegistrationRequest.getRequestInfo().getUserInfo().getUuid());
     }
 
-//    public void enrichFatherApplicantOnSearch(BirthRegistrationApplication application) {
-//        UserDetailResponse fatherUserResponse = userService.searchUser(userUtils.getStateLevelTenant(application.getTenantId()),application.getFather().getId(),null);
-//        User fatherUser = fatherUserResponse.getUser().get(0);
-//        log.info(fatherUser.toString());
-//        FatherApplicant fatherApplicant = FatherApplicant.builder().aadhaarNumber(fatherUser.getAadhaarNumber())
-//                .accountLocked(fatherUser.getAccountLocked())
-//                .active(fatherUser.getActive())
-//                .altContactNumber(fatherUser.getAltContactNumber())
-//                .bloodGroup(fatherUser.getBloodGroup())
-//                .correspondenceAddress(fatherUser.getCorrespondenceAddress())
-//                .correspondenceCity(fatherUser.getCorrespondenceCity())
-//                .correspondencePincode(fatherUser.getCorrespondencePincode())
-//                .gender(fatherUser.getGender())
-//                .id(fatherUser.getUuid())
-//                .name(fatherUser.getName())
-//                .type(fatherUser.getType())
-//                .roles(fatherUser.getRoles()).build();
-//        application.setFather(fatherApplicant);
-//    }
-//
-//    public void enrichMotherApplicantOnSearch(BirthRegistrationApplication application) {
-//        UserDetailResponse motherUserResponse = userService.searchUser(userUtils.getStateLevelTenant(application.getTenantId()),application.getFather().getId(),null);
-//        User motherUser = motherUserResponse.getUser().get(0);
-//        log.info(motherUser.toString());
-//        MotherApplicant motherApplicant = MotherApplicant.builder().aadhaarNumber(motherUser.getAadhaarNumber())
-//                .accountLocked(motherUser.getAccountLocked())
-//                .active(motherUser.getActive())
-//                .altContactNumber(motherUser.getAltContactNumber())
-//                .bloodGroup(motherUser.getBloodGroup())
-//                .correspondenceAddress(motherUser.getCorrespondenceAddress())
-//                .correspondenceCity(motherUser.getCorrespondenceCity())
-//                .correspondencePincode(motherUser.getCorrespondencePincode())
-//                .gender(motherUser.getGender())
-//                .id(motherUser.getUuid())
-//                .name(motherUser.getName())
-//                .type(motherUser.getType())
-//                .roles(motherUser.getRoles()).build();
-//        application.setMother(motherApplicant);
-//    }
+    public void enrichApplicantOnSearch(DeathRegistrationApplication deathRegistrationApplication, DeathApplicationSearchCriteria deathApplicationSearchCriteria) {
+        // Extract necessary details from the provided application
+        String tenantId = deathApplicationSearchCriteria.getTenantId();
+        String accountUuidApplicant = deathRegistrationApplication.getApplicantId();
+        // Use the UserUtil or UserService to fetch user details based on accountId and tenantId
+        UserDetailResponse userDetailResponseApplicant = userService.searchUser(tenantId, accountUuidApplicant, null);
+        // Update the applicant details in the application with enriched user information
+        deathRegistrationApplication.setApplicant(convertUserToApplicant(userDetailResponseApplicant.getUser().get(0)));
+    }
+
+    public Applicant convertUserToApplicant(User user) {
+        Applicant applicant = new Applicant();
+        applicant.setUuid(user.getUuid());
+        applicant.setUserName(user.getUserName());
+        applicant.setName(user.getName());
+        applicant.setGender(user.getGender());
+        applicant.setMobileNumber(user.getMobileNumber());
+        applicant.setEmailId(user.getEmailId());
+        applicant.setActive(user.getActive());
+        applicant.setAccountLocked(user.getAccountLocked());
+        applicant.setTenantId(user.getTenantId());
+        applicant.setType(user.getType());
+        // Copy roles only if present in User and Applicant classes
+        if (user.getRoles() != null && !user.getRoles().isEmpty()) {
+            List<Role> rolesToCopy = new ArrayList<>();
+            for (Role userRole : user.getRoles()) {
+                Role role = new Role();
+                role.setCode(userRole.getCode());
+                role.setName(userRole.getName());
+                role.setTenantId(userRole.getTenantId());
+                rolesToCopy.add(role);
+            }
+            applicant.setRoles(rolesToCopy);
+        }
+        // Additional fields in the Applicant class that are not present in the User class will be ignored (since they are not set).
+        return applicant;
+    }
 }

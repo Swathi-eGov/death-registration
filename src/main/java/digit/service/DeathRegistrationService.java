@@ -61,24 +61,19 @@ public class DeathRegistrationService {
     public List<DeathRegistrationApplication> searchDtApplications(RequestInfo requestInfo, DeathApplicationSearchCriteria deathApplicationSearchCriteria) {
         // Fetch applications from database according to the given search criteria
         List<DeathRegistrationApplication> applications = deathRegistrationRepository.getApplications(deathApplicationSearchCriteria);
-
         // If no applications are found matching the given criteria, return an empty list
         if (CollectionUtils.isEmpty(applications))
             return new ArrayList<>();
-
-        // Enrich mother and father of applicant objects
-//        applications.forEach(application -> {
-//            enrichmentUtil.enrichFatherApplicantOnSearch(application);
-//            enrichmentUtil.enrichMotherApplicantOnSearch(application);
-//        });
-
+        // Enrich Applicant....
+        applications.forEach(application -> {
+            deathApplicationSearchCriteria.setIds(Collections.singletonList(application.getApplicantId()));
+            enrichmentUtil.enrichApplicantOnSearch(application,deathApplicationSearchCriteria);
+        });
 //        WORKFLOW INTEGRATION
-
         applications.forEach(application -> {
             ProcessInstance obj = workflowService.getCurrentWorkflow(requestInfo, application.getTenantId(), application.getApplicationNumber());
             application.setWorkflow(Workflow.builder().status(obj.getState().getState()).build());
         });
-
         // Otherwise return the found applications
         return applications;
     }
@@ -87,17 +82,11 @@ public class DeathRegistrationService {
         // Validate whether the application that is being requested for update indeed exists
         DeathRegistrationApplication existingApplication = validator.validateApplicationExistence(deathRegistrationRequest.getDeathRegistrationApplications().get(0));
         existingApplication.setWorkflow(deathRegistrationRequest.getDeathRegistrationApplications().get(0).getWorkflow());
-//        log.info(existingApplication.toString());
-//        deathRegistrationRequest.setDeathRegistrationApplications(Collections.singletonList(existingApplication));
-
         // Enrich application upon update
         enrichmentUtil.enrichDeathApplicationUponUpdate(deathRegistrationRequest);
-
         workflowService.updateWorkflowStatus(deathRegistrationRequest);
-
         // Just like create request, update request will be handled asynchronously by the persister
         producer.push("update-dt-application", deathRegistrationRequest);
-
         return deathRegistrationRequest.getDeathRegistrationApplications().get(0);
     }
 
